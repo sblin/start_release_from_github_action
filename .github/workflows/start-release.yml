@@ -13,19 +13,19 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       
-    - name: Set SHA8
-      run: echo ::set-env name=SHA8::$(git log --oneline -1 | awk '{print $1}')
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+    - name: Set env
+      run: echo "ACTIONS_ALLOW_UNSECURE_COMMANDS=true" >> "$GITHUB_ENV"
 
     - name: Get Commit Message
+      id: get_commit_message
       run: |
         MSG=$(git log --format=%B -n 1 ${{github.event.after}})
-        echo "::set-env name=COMMIT_MESSAGE::${MSG}"
+        echo "COMMIT_MESSAGE=${MSG}" >> "$GITHUB_ENV"
 
-    - name: Set env
+    - name: Get Tag
+      id: get_tag
       run: |
-        echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        echo "TAG=${GITHUB_REF#refs/*/}" >> "$GITHUB_ENV"
         echo "PAYLOAD={\"tag\":\"{{ env.TAG }}\", \"commit_message\":\"{{ env.COMMIT_MESSAGE }}\"}" >> $GITHUB_ENV
 
 
