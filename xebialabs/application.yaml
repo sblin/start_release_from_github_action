@@ -1,0 +1,33 @@
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/DemoWebapp/DemoWebApp
+  type: udm.Application
+  lastVersion: !value appVersion
+  pipeline: Configuration/Pipelines/DemoWebApp_Pipeline
+  children:
+  - name: !value appVersion
+    type: udm.DeploymentPackage
+    deployables:
+    - name: frontend-app
+      type: jee.War
+      scanPlaceholders: true
+      placeholders:
+      - smoketest.expectedResponse
+      file: !file ../demowebapp/target/demowebapp.war
+    - name: datasource
+      type: tomcat.DataSourceSpec
+      context: petclinic
+      jndiName: jdbc/PetPortalDB
+      driverClassName: com.mysql.jdbc.Driver
+      url: '{{mysql.url}}'
+      username: '{{mysql.username}}'
+      password: '{{mysql.password}}'
+    - name: backend-app
+      type: jee.War
+      scanPlaceholders: true
+      file: !file ../demowebapp-backend/target/demowebapp-Backend.war
+    - name: sql-scripts
+      type: sql.SqlScripts
+      file: !file ../demowebapp-backend/sql/sql.zip

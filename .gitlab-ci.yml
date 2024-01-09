@@ -1,0 +1,54 @@
+image: maven:3.6.1-jdk-11
+
+stages:
+  - clean
+  - package
+  - deploy
+  - release
+  - notify_release_oncommit
+
+job_clean:
+  stage: clean
+  script: 
+    - echo "Starting clean"
+    - mvn clean
+    - echo "Ending clean"
+  only:
+  - schedules
+
+job_package:
+  stage: package
+  script:
+    - echo "Starting package"
+    - mvn package
+    - echo "Ending package"
+  artifacts:
+    paths:
+      - demowebapp-backend/target/*.war
+      - demowebapp/target/*.war
+  only:
+  - schedules
+
+job_deploy:
+  stage: deploy
+  script:
+    - echo $CI_COMMIT_TAG >> version.txt
+    - ./xlw apply xl-deploy --xl-deploy-url http://host.docker.internal:4516 -f xebialabs/xebialabs.yaml --values appVersion=$CI_COMMIT_TAG
+  artifacts:
+    paths:
+    - version.txt
+    expire_in: 1 week
+  when: on_success
+  only:
+  - schedules
+
+job_release:
+  stage: release
+  before_script:
+    - TAG=$(git describe --tags)
+    - COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+    - PAYLOAD="{\"tag\":\"${TAG}\",\"commit_message\":\"${COMMIT_MESSAGE}\"}"
+  script:
+    - curl -X POST 'http://host.docker.internal:5516/webhooks/gitlabendpoint' --header 'Content-Type:application/json' --data "$PAYLOAD"
+  only:
+  - tags

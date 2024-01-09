@@ -1,0 +1,50 @@
+name: Maven package & start release
+  
+on:
+  push:
+    tags: 
+      - '*.*.*'
+
+jobs:
+  build:
+    
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Set SHA8
+      run: echo ::set-env name=SHA8::$(git log --oneline -1 | awk '{print $1}')
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+    - name: Set env
+      run: |
+        echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+        echo "COMMIT_MESSAGE=${github.event.head_commit.message}" >> $GITHUB_ENV
+        echo "PAYLOAD={\"tag\":\"{{ env.TAG }}\", \"commit_message\":\"{{ env.COMMIT_MESSAGE }}\"}" >> $GITHUB_ENV
+
+
+    - name: Test
+      run: |
+        echo $TAG
+        echo ${{ env.TAG }}
+        echo $COMMIT_MESSAGE
+        echo {{ env.COMMIT_MESSAGE }}
+        echo $PAYLOAD
+        echo {{ env.PAYLOAD }}
+        
+    - name: Trigger Release Template 
+      env:
+        XLR_USER: ${{ secrets.XLR_USER }}
+        XLR_PASS: ${{ secrets.XLR_PASS }}
+        XLR_URL: ${{ secrets.XLR_URL }}   
+      run: |
+        cd argocd/helloworld-src
+        sed -i "s/PLACEHOLDER/$SHA8/g" start-release.yaml
+        curl -LO https://dist.xebialabs.com/public/xl-cli/22.2.0/linux-amd64/xl
+        chmod +x xl
+        ./xl apply --xl-release-url=$XLR_URL --xl-release-username=$XLR_USER --xl-release-password=$XLR_PASS --file start-release.yaml
+        echo `./xl version`
+        rm xl
+   
