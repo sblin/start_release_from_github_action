@@ -26,8 +26,11 @@ jobs:
       id: get_tag
       run: |
         echo "TAG=${GITHUB_REF#refs/*/}" >> "$GITHUB_ENV"
-        echo "PAYLOAD={\"tag\":\"${{ env.TAG }}\", \"commit_message\":\"${{ env.COMMIT_MESSAGE }}\"}" >> $GITHUB_ENV
 
+    - name: Set Payload
+      id: set_payload
+      run: |
+        echo "PAYLOAD={\"tag\":\"${{ env.TAG }}\", \"commit_message\":\"${{ env.COMMIT_MESSAGE }}\"}" >> $GITHUB_ENV
 
     - name: Test
       run: |
