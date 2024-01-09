@@ -6,7 +6,7 @@ on:
       - '*.*.*'
 
 jobs:
-  build:
+  call-release:
     
     runs-on: ubuntu-latest
 
@@ -26,15 +26,12 @@ jobs:
       id: get_tag
       run: |
         echo "TAG=${GITHUB_REF#refs/*/}" >> "$GITHUB_ENV"
-        echo "PAYLOAD={\"tag\":\"{{ env.TAG }}\", \"commit_message\":\"{{ env.COMMIT_MESSAGE }}\"}" >> $GITHUB_ENV
+        echo "PAYLOAD={\"tag\":\"${{ env.TAG }}\", \"commit_message\":\"${{ env.COMMIT_MESSAGE }}\"}" >> $GITHUB_ENV
 
 
     - name: Test
       run: |
-        echo $TAG
-        echo ${{ env.TAG }}
-        echo $PAYLOAD
-        echo {{ env.PAYLOAD }}
+        echo ${{ env.PAYLOAD }}
         
     - name: Trigger Release Template 
       env:
