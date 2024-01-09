@@ -39,5 +39,5 @@ jobs:
     - name: Trigger Release Template 
       env:
         XLR_URL: ${{ secrets.XLR_URL }}   
-      run: curl '${{ secrets.XLR_URL }}/webhooks/githubendpoint' --header 'Content-Type:application/json' --data \"${{env.PAYLOAD}}\"
+      run: curl '${{ secrets.XLR_URL }}/webhooks/githubendpoint' --header 'Content-Type:application/json' --data "${{env.PAYLOAD}}"
    
