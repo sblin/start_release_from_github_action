@@ -19,9 +19,9 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
     - name: Get Commit Message
-        run: |
-          MSG=$(git log --format=%B -n 1 ${{github.event.after}})
-          echo "::set-env name=COMMIT_MESSAGE::${MSG}"
+      run: |
+        MSG=$(git log --format=%B -n 1 ${{github.event.after}})
+        echo "::set-env name=COMMIT_MESSAGE::${MSG}"
 
     - name: Set env
       run: |
